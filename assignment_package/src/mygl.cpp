@@ -234,7 +234,6 @@ void MyGL::ResizeToSceneCamera()
 
 void MyGL::keyPressEvent(QKeyEvent *e)
 {
-    something_rendered = false;
     float amount = 2.0f;
     if(e->modifiers() & Qt::ShiftModifier){
         amount = 10.0f;
