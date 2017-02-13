@@ -251,18 +251,18 @@ additional color, as light does in reality. You should produce this render:
 Progressive rendering and render region
 ---------------------------------------
 We also have added functionality to progressively render scenes based on the regions you select. By default, if you hit render, you would see the OpenGL preview change to the render of the scene.
-![](./renderRegion4.png)
+![](./RenderRegion4.png)
 
 The preview scene will show up if you move your camera and then set it to render.
 
 The render region works with the progressive renderer, similar to what exists in Maya.
-![](./renderRegion1.png)
+![](./RenderRegion1.png)
 
 Click and drag region in the GL preview and hit render.
 
-![](./renderRegion5.png)
+![](./RenderRegion5.png)
 
-![](./renderRegion2.png)
+![](./RenderRegion2.png)
 
 Debugging with breakpoints
 ------
