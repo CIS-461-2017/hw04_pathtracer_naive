@@ -79,6 +79,7 @@ private:
     bool move_rubberband;
     QPoint rubberband_offset;
     QPoint origin;
+    bool something_rendered;
 
 protected:
     void keyPressEvent(QKeyEvent *e);

@@ -14,6 +14,8 @@ public:
     void WriteImage(QString path);
     Bounds2i bounds;
 
+    void cleanPixels();
+
 private:
     std::vector<std::vector<Color3f>> pixels;//A 2D array of pixels in which we can store colors
 };

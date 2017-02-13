@@ -52,3 +52,11 @@ void Film::WriteImage(QString path)
     output.save(path);
 }
 
+void Film::cleanPixels() {
+    Vector2i diag = this->bounds.Diagonal();
+    for(unsigned int i = 0; i < diag.x; ++i)
+        pixels.at(i).clear();
+    pixels.clear();
+    SetDimensions(diag.x, diag.y);
+}
+

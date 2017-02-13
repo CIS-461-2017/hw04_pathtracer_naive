@@ -50,7 +50,7 @@ Color3f BSDF::Sample_f(const Vector3f &woW, Vector3f *wiW, const Point2f &xi,
 float BSDF::Pdf(const Vector3f &woW, const Vector3f &wiW, BxDFType flags) const
 {
     //TODO
-    return 0.f
+    return 0.f;
 }
 
 Color3f BxDF::Sample_f(const Vector3f &wo, Vector3f *wi, const Point2f &xi,

@@ -35,6 +35,7 @@ MyGL::MyGL(QWidget *parent)
     rubberBand->show();
     origin = QPoint(0, 0);
     rubberband_offset = QPoint(0, 0);
+    something_rendered = false;
 }
 
 void MyGL::mousePressEvent(QMouseEvent *e)
@@ -120,6 +121,11 @@ void MyGL::initializeGL()
     prog_progressive.addShaderFromSourceFile(QOpenGLShader::Vertex  , ":/glsl/renderview.vert.glsl");
     prog_progressive.addShaderFromSourceFile(QOpenGLShader::Fragment,  ":/glsl/renderview.frag.glsl");
     prog_progressive.link();
+    // create full screen quad for progressive rendering
+    glGenBuffers(1, &progressive_position_buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, progressive_position_buffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(screen_quad_pos), screen_quad_pos, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     //Test scene data initialization
     scene.CreateTestScene();
@@ -150,16 +156,16 @@ void MyGL::paintGL()
     // Clear the screen so that we only see newly drawn images
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-//    if (!is_rendering)
+    if (is_rendering || something_rendered)
+    {
+        GLDrawProgressiveView();
+    }
+    else
     {
         // Update the viewproj matrix
         prog_lambert.setViewProjMatrix(gl_camera.GetViewProj());
         prog_flat.setViewProjMatrix(gl_camera.GetViewProj());
         GLDrawScene();
-    }
-//    else
-    {
-//        GLDrawProgressiveView();
     }
 }
 
@@ -195,8 +201,8 @@ void MyGL::GLDrawScene()
             prog_flat.draw(*this, *dal->shape);
         }
     }
-//    prog_flat.setModelMatrix(glm::mat4(1.0f));
-//    prog_flat.draw(*this, scene.camera);
+    prog_flat.setModelMatrix(glm::mat4(1.0f));
+    prog_flat.draw(*this, scene.camera);
 }
 
 void MyGL::ResizeToSceneCamera()
@@ -218,6 +224,7 @@ void MyGL::ResizeToSceneCamera()
 
 void MyGL::keyPressEvent(QKeyEvent *e)
 {
+    something_rendered = false;
     float amount = 2.0f;
     if(e->modifiers() & Qt::ShiftModifier){
         amount = 10.0f;
@@ -254,6 +261,12 @@ void MyGL::keyPressEvent(QKeyEvent *e)
     } else if (e->key() == Qt::Key_R) {
         scene.camera = Camera(gl_camera);
         scene.camera.recreate();
+        if(!is_rendering)
+        {
+            // If we moved the camera and we're not currently rendering,
+            // then clean the pixels of our film.
+            scene.film.cleanPixels();
+        }
     }
     gl_camera.RecomputeAttributes();
     update();  // Calls paintGL, among other things
@@ -261,7 +274,7 @@ void MyGL::keyPressEvent(QKeyEvent *e)
 
 void MyGL::onRenderUpdate()
 {
-    if (!this->is_rendering)
+    if (!is_rendering)
         return;
 
     update();
@@ -273,7 +286,7 @@ void MyGL::onRenderUpdate()
 
     if (QThreadPool::globalInstance()->waitForDone())
     {
-        this->completeRender();
+        completeRender();
     }
 }
 
@@ -383,6 +396,7 @@ void MyGL::RenderScene()
     }
     render_event_timer.start(500);
     is_rendering = true;
+     something_rendered = true;
 }
 
 void MyGL::GLDrawProgressiveView()
