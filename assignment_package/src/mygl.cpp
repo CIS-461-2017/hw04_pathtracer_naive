@@ -120,7 +120,17 @@ void MyGL::initializeGL()
     // Create shader program for progressive render view
     prog_progressive.addShaderFromSourceFile(QOpenGLShader::Vertex  , ":/glsl/renderview.vert.glsl");
     prog_progressive.addShaderFromSourceFile(QOpenGLShader::Fragment,  ":/glsl/renderview.frag.glsl");
+    prog_progressive_attribute_position = 0;
+    prog_progressive_attribute_texcoord = 1;
+    prog_progressive.bindAttributeLocation("position", prog_progressive_attribute_position);
+    prog_progressive.bindAttributeLocation("uv", prog_progressive_attribute_texcoord);
     prog_progressive.link();
+    // create full screen quad for progressive rendering
+    glGenBuffers(1, &progressive_position_buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, progressive_position_buffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(screen_quad_pos), screen_quad_pos, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
     // create full screen quad for progressive rendering
     glGenBuffers(1, &progressive_position_buffer);
     glBindBuffer(GL_ARRAY_BUFFER, progressive_position_buffer);
@@ -153,15 +163,15 @@ void MyGL::resizeGL(int w, int h)
 // For example, when the function updateGL is called, paintGL is called implicitly.
 void MyGL::paintGL()
 {
-    // Clear the screen so that we only see newly drawn images
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    if (is_rendering || something_rendered)
+    if (progressive_render && (is_rendering || something_rendered))
     {
+        glClear(GL_DEPTH_BUFFER_BIT);
         GLDrawProgressiveView();
     }
     else
-    {
+    {    // Clear the screen so that we only see newly drawn images
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
         // Update the viewproj matrix
         prog_lambert.setViewProjMatrix(gl_camera.GetViewProj());
         prog_flat.setViewProjMatrix(gl_camera.GetViewProj());
@@ -224,11 +234,13 @@ void MyGL::ResizeToSceneCamera()
 
 void MyGL::keyPressEvent(QKeyEvent *e)
 {
-    something_rendered = false;
     float amount = 2.0f;
     if(e->modifiers() & Qt::ShiftModifier){
         amount = 10.0f;
     }
+
+    bool invalid_key = false;
+
     // http://doc.qt.io/qt-5/qt.html#Key-enum
     if (e->key() == Qt::Key_Escape) {
         QApplication::quit();
@@ -261,15 +273,26 @@ void MyGL::keyPressEvent(QKeyEvent *e)
     } else if (e->key() == Qt::Key_R) {
         scene.camera = Camera(gl_camera);
         scene.camera.recreate();
+    } else
+    {
+        invalid_key = true;
+    }
+
+    if (!invalid_key)
+    {
+        something_rendered = false;
+        gl_camera.RecomputeAttributes();
+
+
         if(!is_rendering)
         {
             // If we moved the camera and we're not currently rendering,
             // then clean the pixels of our film.
             scene.film.cleanPixels();
         }
+
+        update();  // Calls paintGL, among other things
     }
-    gl_camera.RecomputeAttributes();
-    update();  // Calls paintGL, among other things
 }
 
 void MyGL::onRenderUpdate()
@@ -292,6 +315,8 @@ void MyGL::onRenderUpdate()
 
 void MyGL::SceneLoadDialog()
 {
+    something_rendered = false;
+
     QString filepath = QFileDialog::getOpenFileName(0, QString("Load Scene"), QString("../scene_files"), tr("*.json"));
     if(filepath.length() == 0)
     {
@@ -322,7 +347,6 @@ void MyGL::RenderScene()
     {
         return;
     }
-
     // recreate progressive rendering texture
     if (progressive_texture)
     {
@@ -332,9 +356,8 @@ void MyGL::RenderScene()
     }
     progressive_texture = new QOpenGLTexture(QOpenGLTexture::Target2D);
     progressive_texture->setSize(scene.film.bounds.Diagonal().x, scene.film.bounds.Diagonal().y);
-    progressive_texture->setFormat(QOpenGLTexture::TextureFormat::RGB32F);
+    progressive_texture->setFormat(QOpenGLTexture::TextureFormat::RGBA32F);
     progressive_texture->allocateStorage();
-
     // Get the bounds of the camera portion we are going to render
     // Ask the film for its bounds
     Bounds2i renderBounds = scene.film.bounds;
@@ -404,48 +427,53 @@ void MyGL::GLDrawProgressiveView()
     // if rendering, draw progressive rendering scene;
     prog_progressive.bind();
 
-
     Vector2i dims = scene.film.bounds.Diagonal();
-    std::vector<glm::vec3> texdata(dims.x * dims.y);
+    std::vector<glm::vec4> texdata(dims.x * dims.y);
 
-    // TODO: maybe change underlying structure of scene film so don't need to copy here
     for (unsigned int x = 0; x < dims.x; x++)
     {
         for (unsigned int y = 0; y < dims.y; y++)
         {
-            texdata[x + y * dims.x] = scene.film.GetColor(Point2i(x, y));
+            if (scene.film.IsPixelColorSet(Point2i(x, y)))
+            {
+                texdata[x + y * dims.x] = glm::vec4(scene.film.GetColor(Point2i(x, y)), 1.0f);
+            }
+            else
+            {
+                texdata[x + y * dims.x] = glm::vec4(0.0f);
+            }
         }
     }
 
-    progressive_texture->setData(QOpenGLTexture::PixelFormat::RGB, QOpenGLTexture::PixelType::Float32, texdata.data());
+    progressive_texture->setData(QOpenGLTexture::PixelFormat::RGBA, QOpenGLTexture::PixelType::Float32, texdata.data());
     progressive_texture->setMinificationFilter(QOpenGLTexture::LinearMipMapLinear);
     progressive_texture->setMagnificationFilter(QOpenGLTexture::Linear);
 
     // the initial texture is from the opengl frame buffer before start rendering
     progressive_texture->bind();
 
-
     glBindBuffer(GL_ARRAY_BUFFER, progressive_position_buffer);
 
-    int vertexLocation = prog_progressive.attributeLocation("position");
-    prog_progressive.enableAttributeArray(vertexLocation);
-    int vertexTextureCoord = prog_progressive.attributeLocation("texcoord");
-    prog_progressive.enableAttributeArray(vertexTextureCoord);
+    prog_progressive.enableAttributeArray(prog_progressive_attribute_position);
+    glVertexAttribPointer(prog_progressive_attribute_position, 3, GL_FLOAT, GL_FALSE, 5*sizeof(GLfloat), 0);
+    prog_progressive.enableAttributeArray(prog_progressive_attribute_texcoord);
+    glVertexAttribPointer(prog_progressive_attribute_texcoord, 2, GL_FLOAT, GL_TRUE, 5*sizeof(GLfloat), (const GLvoid*)(3 * sizeof(GLfloat)));
 
-    glVertexAttribPointer(vertexLocation, 3, GL_FLOAT, GL_FALSE, 5*sizeof(GLfloat), 0);
-    glVertexAttribPointer(vertexTextureCoord, 2, GL_FLOAT, GL_TRUE, 5*sizeof(GLfloat), (const GLvoid*)(3 * sizeof(GLfloat)));
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable( GL_BLEND );
 
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
+    glDisable(GL_BLEND);
     progressive_texture->release();
 }
 
 void MyGL::completeRender()
 {
     is_rendering = false;
-    scene.film.WriteImage(output_filepath);
-    QThreadPool::globalInstance()->clear();
+    something_rendered = true;
     render_event_timer.stop();
+    scene.film.WriteImage(output_filepath);
     completeSFX.play();
 }
 
@@ -457,4 +485,9 @@ void MyGL::slot_SetNumSamplesSqrt(int i)
 void MyGL::slot_SetRecursionLimit(int n)
 {
     recursionLimit = n;
+}
+
+void MyGL::slot_SetProgressiveRender(bool b)
+{
+    progressive_render = b;
 }
