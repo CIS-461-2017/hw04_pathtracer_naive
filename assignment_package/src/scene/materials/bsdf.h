@@ -81,7 +81,7 @@ public:
     BxDF(BxDFType type) : type(type) {}
     virtual ~BxDF() {}
 
-    virtual Color3f f(const Vector3f &woW, const Vector3f &wiW) const = 0;
+    virtual Color3f f(const Vector3f &wo, const Vector3f &wi) const = 0;
 
     // Generates a uniformly random sample on the hemisphere
     // and evaluates f() on it.

@@ -15,6 +15,8 @@ public:
     Bounds2i bounds;
     bool IsPixelColorSet(const Point2i& pixel);
 
+    void cleanPixels();
+
 private:
     std::vector<std::vector<Color3f>> pixels;//A 2D array of pixels in which we can store colors
     std::vector<std::vector<bool>> pixel_has_color;// A 2D array to indicate if there is something rendered on the pixel

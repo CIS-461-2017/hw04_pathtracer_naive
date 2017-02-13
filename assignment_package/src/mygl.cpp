@@ -35,6 +35,7 @@ MyGL::MyGL(QWidget *parent)
     rubberBand->show();
     origin = QPoint(0, 0);
     rubberband_offset = QPoint(0, 0);
+    something_rendered = false;
 }
 
 void MyGL::mousePressEvent(QMouseEvent *e)
@@ -124,6 +125,11 @@ void MyGL::initializeGL()
     prog_progressive.bindAttributeLocation("position", prog_progressive_attribute_position);
     prog_progressive.bindAttributeLocation("uv", prog_progressive_attribute_texcoord);
     prog_progressive.link();
+    // create full screen quad for progressive rendering
+    glGenBuffers(1, &progressive_position_buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, progressive_position_buffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(screen_quad_pos), screen_quad_pos, GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
 
     // create full screen quad for progressive rendering
     glGenBuffers(1, &progressive_position_buffer);
@@ -205,8 +211,8 @@ void MyGL::GLDrawScene()
             prog_flat.draw(*this, *dal->shape);
         }
     }
-//    prog_flat.setModelMatrix(glm::mat4(1.0f));
-//    prog_flat.draw(*this, scene.camera);
+    prog_flat.setModelMatrix(glm::mat4(1.0f));
+    prog_flat.draw(*this, scene.camera);
 }
 
 void MyGL::ResizeToSceneCamera()
@@ -228,6 +234,7 @@ void MyGL::ResizeToSceneCamera()
 
 void MyGL::keyPressEvent(QKeyEvent *e)
 {
+    something_rendered = false;
     float amount = 2.0f;
     if(e->modifiers() & Qt::ShiftModifier){
         amount = 10.0f;
@@ -276,13 +283,22 @@ void MyGL::keyPressEvent(QKeyEvent *e)
     {
         something_rendered = false;
         gl_camera.RecomputeAttributes();
+
+
+        if(!is_rendering)
+        {
+            // If we moved the camera and we're not currently rendering,
+            // then clean the pixels of our film.
+            scene.film.cleanPixels();
+        }
+
         update();  // Calls paintGL, among other things
     }
 }
 
 void MyGL::onRenderUpdate()
 {
-    if (!this->is_rendering)
+    if (!is_rendering)
         return;
 
     update();
@@ -294,7 +310,7 @@ void MyGL::onRenderUpdate()
 
     if (QThreadPool::globalInstance()->waitForDone())
     {
-        this->completeRender();
+        completeRender();
     }
 }
 
@@ -404,6 +420,7 @@ void MyGL::RenderScene()
     }
     render_event_timer.start(500);
     is_rendering = true;
+     something_rendered = true;
 }
 
 void MyGL::GLDrawProgressiveView()

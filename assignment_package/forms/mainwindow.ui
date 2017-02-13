@@ -118,6 +118,9 @@
     <property name="text">
      <string>Progressive Preview</string>
     </property>
+    <property name="checked">
+     <bool>true</bool>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">

@@ -59,3 +59,11 @@ bool Film::IsPixelColorSet(const Point2i &pixel)
     return pixel_has_color[pixel.x][pixel.y];
 }
 
+void Film::cleanPixels() {
+    Vector2i diag = this->bounds.Diagonal();
+    for(unsigned int i = 0; i < diag.x; ++i)
+        pixels.at(i).clear();
+    pixels.clear();
+    SetDimensions(diag.x, diag.y);
+}
+
