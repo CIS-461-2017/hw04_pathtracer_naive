@@ -18,11 +18,13 @@ void Film::SetDimensions(unsigned int w, unsigned int h)
     for(unsigned int i = 0; i < w; i++){
         pixels[i] = std::vector<Color3f>(h);
     }
+    pixel_has_color = std::vector<std::vector<bool>>(w, std::vector<bool>(h, false));
 }
 
 void Film::SetPixelColor(const Point2i &pixel, const Color3f pixelColor)
 {
     pixels[pixel.x][pixel.y] = pixelColor;
+    pixel_has_color[pixel.x][pixel.y] = true;
 }
 
 Color3f Film::GetColor(const Point2i &pixel)
@@ -50,5 +52,10 @@ void Film::WriteImage(QString path)
         }
     }
     output.save(path);
+}
+
+bool Film::IsPixelColorSet(const Point2i &pixel)
+{
+    return pixel_has_color[pixel.x][pixel.y];
 }
 

@@ -106,6 +106,19 @@
      <bool>true</bool>
     </property>
    </widget>
+   <widget class="QCheckBox" name="checkBox_Progressive">
+    <property name="geometry">
+     <rect>
+      <x>490</x>
+      <y>470</y>
+      <width>131</width>
+      <height>20</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Progressive Preview</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
@@ -113,7 +126,7 @@
      <x>0</x>
      <y>0</y>
      <width>640</width>
-     <height>26</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -174,6 +187,7 @@
     <slot>slot_SceneDialog()</slot>
     <slot>slot_SetNumSamplesSqrt(int)</slot>
     <slot>slot_SetRecursionLimit(int)</slot>
+    <slot>slot_SetProgressiveRender(bool)</slot>
    </slots>
   </customwidget>
  </customwidgets>
@@ -224,6 +238,22 @@
     <hint type="destinationlabel">
      <x>488</x>
      <y>430</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBox_Progressive</sender>
+   <signal>toggled(bool)</signal>
+   <receiver>mygl</receiver>
+   <slot>slot_SetProgressiveRender(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>555</x>
+     <y>500</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>319</x>
+     <y>247</y>
     </hint>
    </hints>
   </connection>
