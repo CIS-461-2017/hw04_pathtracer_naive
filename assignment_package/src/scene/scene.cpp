@@ -1,0 +1,114 @@
+#include <scene/scene.h>
+
+#include <scene/geometry/cube.h>
+#include <scene/geometry/sphere.h>
+#include <scene/geometry/mesh.h>
+#include <scene/geometry/squareplane.h>
+#include <scene/materials/mattematerial.h>
+#include <scene/lights/diffusearealight.h>
+
+Scene::Scene()
+{}
+
+void Scene::SetCamera(const Camera &c)
+{
+    camera = Camera(c);
+    camera.create();
+    film.SetDimensions(c.width, c.height);
+}
+
+bool Scene::Intersect(const Ray &ray, Intersection *isect) const
+{
+    bool result = false;
+    for(std::shared_ptr<Primitive> p : primitives)
+    {
+        Intersection testIsect;
+        if(p->Intersect(ray, &testIsect))
+        {
+            if(testIsect.t < isect->t || isect->t < 0)
+            {
+                *isect = testIsect;
+                result = true;
+            }
+        }
+    }
+    return result;
+}
+
+void Scene::CreateTestScene()
+{
+    //Floor
+    //Area light
+    //Figure in front of light
+
+    Material* matteWhite = new MatteMaterial(Color3f(1,1,1), 0, nullptr, nullptr);
+    Material* matteRed = new MatteMaterial(Color3f(1,0,0), 0, nullptr, nullptr);
+    Material* matteGreen = new MatteMaterial(Color3f(0,1,0), 0, nullptr, nullptr);
+
+    // Floor, which is a large white plane
+    Shape* floor = new SquarePlane();
+    floor->transform = Transform(Vector3f(0,0,0), Vector3f(-90,0,0), Vector3f(10,10,1));
+    Primitive* floorPrim = new Primitive(std::shared_ptr<Shape>(floor));
+    floorPrim->material = std::shared_ptr<Material>(matteWhite);
+    floorPrim->name = QString("Floor");
+
+    // Light source, which is a diffuse area light with a large plane as its shape
+    Shape* lightSquare = new SquarePlane();
+    lightSquare->transform = Transform(Vector3f(0,2.5f,5), Vector3f(0,180,0), Vector3f(8, 5, 1));
+    AreaLight* lightSource = new DiffuseAreaLight(lightSquare->transform, Color3f(1,1,1) * 2.f, std::shared_ptr<Shape>(lightSquare));
+    Primitive* lightPrim = new Primitive(std::shared_ptr<Shape>(lightSquare), nullptr, std::shared_ptr<AreaLight>(lightSource));
+    lightPrim->name = QString("Light Source");
+
+    // Light source 2, which is a diffuse area light with a large plane as its shape
+    Shape* lightSquare2 = new SquarePlane();
+    lightSquare2->transform = Transform(Vector3f(5,2.5f,0), Vector3f(0,90,0), Vector3f(8, 5, 1));
+    AreaLight* lightSource2 = new DiffuseAreaLight(lightSquare2->transform, Color3f(0.9,1,0.7) * 2.f, std::shared_ptr<Shape>(lightSquare2), true);
+    Primitive* lightPrim2 = new Primitive(std::shared_ptr<Shape>(lightSquare2), nullptr, std::shared_ptr<AreaLight>(lightSource2));
+
+    // Shadow casting shape, which is a red sphere
+    Shape* sphere = new Sphere();
+    sphere->transform = Transform(Vector3f(0,1,0), Vector3f(0,0,0), Vector3f(1,1,1));
+    Primitive* spherePrim = new Primitive(std::shared_ptr<Shape>(sphere));
+    spherePrim->material = std::shared_ptr<Material>(matteRed);
+    spherePrim->name = QString("Red Sphere");
+
+    // Back wall, which is a green rectangle
+    Shape* greenWall = new SquarePlane();
+    greenWall->transform = Transform(Vector3f(-5,2.5f,0), Vector3f(0,-90,0), Vector3f(10, 5, 1));
+    Primitive* greenWallPrim = new Primitive(std::shared_ptr<Shape>(greenWall));
+    greenWallPrim->material = std::shared_ptr<Material>(matteGreen);
+    greenWallPrim->name = QString("Wall");
+
+
+    primitives.append(std::shared_ptr<Primitive>(floorPrim));
+    primitives.append(std::shared_ptr<Primitive>(lightPrim));
+    primitives.append(std::shared_ptr<Primitive>(lightPrim2));
+    primitives.append(std::shared_ptr<Primitive>(spherePrim));
+    primitives.append(std::shared_ptr<Primitive>(greenWallPrim));
+
+    lights.append(std::shared_ptr<Light>(lightSource));
+    lights.append(std::shared_ptr<Light>(lightSource2));
+
+    for(std::shared_ptr<Primitive> p : primitives)
+    {
+        p->shape->create();
+    }
+
+    camera = Camera(400, 400, Point3f(5, 8, -5), Point3f(0,0,0), Vector3f(0,1,0));
+    camera.near_clip = 0.1f;
+    camera.far_clip = 100.0f;
+    camera.create();
+    film = Film(400, 400);
+}
+
+void Scene::Clear()
+{
+    // These lists contain shared_ptrs
+    // so the pointers will be freed
+    // if appropriate when we clear the lists.
+    primitives.clear();
+    lights.clear();
+    materials.clear();
+    camera = Camera();
+    film = Film();
+}
