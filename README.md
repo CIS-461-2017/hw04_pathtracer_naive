@@ -256,13 +256,13 @@ We also have added functionality to progressively render scenes based on the reg
 The preview scene will show up if you move your camera and then set it to render.
 
 The render region works with the progressive renderer, similar to what exists in Maya.
-![](./renderRegion1.PNG)
+![](./renderRegion1.png)
 
 Click and drag region in the GL preview and hit render.
 
-![](./renderRegion5.PNG)
+![](./renderRegion5.png)
 
-![](./renderRegion2.PNG)
+![](./renderRegion2.png)
 
 Debugging with breakpoints
 ------
