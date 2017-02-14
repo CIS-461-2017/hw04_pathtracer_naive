@@ -264,7 +264,7 @@ void MyGL::keyPressEvent(QKeyEvent *e)
         gl_camera.TranslateAlongUp(amount);
     } else if (e->key() == Qt::Key_F) {
         gl_camera.CopyAttributes(scene.camera);
-    } else if (e->key() == Qt::Key_R) {
+    } else if (e->key() == Qt::Key_G) {
         scene.camera = Camera(gl_camera);
         scene.camera.recreate();
     } else

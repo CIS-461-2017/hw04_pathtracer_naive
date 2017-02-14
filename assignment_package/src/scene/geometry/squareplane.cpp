@@ -2,7 +2,7 @@
 
 float SquarePlane::Area() const
 {
-    //TODO in a later assignment
+    //TODO
     return 0.f;
 }
 

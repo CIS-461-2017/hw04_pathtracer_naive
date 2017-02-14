@@ -73,7 +73,7 @@ Copy your implementation of `warpfunctions.cpp` into the base code we've
 provided. You may have to change some of the constants you used in homework 3,
 such as `M_PI` to `Pi`. Refer to `globals.h` for more information.
 
-`Shape::ComputeTBN` (N points)
+`Shape::ComputeTBN` (5 points)
 ----------------
 We have provided you with implementations of the function `Shape::Intersect`,
 which computes the intersection of a ray with some surface, such as a sphere or
@@ -112,7 +112,7 @@ the following data:
 * A pointer to an `AreaLight` describing the energy emitted by the surface
 of the `Shape` held by this `Primitive`.
 
-`BSDF` Class (N points)
+`BSDF` Class (30 points)
 ----------
 In `scene/materials/bsdf.h`, you will find the declaration of a `BSDF` class.
 This class represents a generic Bidirectional Scattering Distribution Function,
@@ -138,7 +138,7 @@ We have provided comments above each of these functions in `bsdf.h` which
 describe what these functions are supposed to do. Please make sure you read
 these comments carefully before you begin implementing these functions.
 
-`BxDF` Class (N points)
+`BxDF` Class (15 points)
 -------------
 You will find the declaration of the `BxDF` class in `scene/materials/bsdf.h`.
 As explained previously, `BxDF` is an abstract class used to evaluate the
@@ -150,7 +150,7 @@ distribution. Note that `Sample_f` also returns the result of invoking `f` on
 the input `wo` and the generated `wi`, but `f` will be defined by specific
 subclasses of `BxDF`.
 
-`LambertBRDF` Class (N points)
+`LambertBRDF` Class (15 points)
 --------
 In `scene/materials/lambertbrdf.h` you will find the declaration of a class
 `LambertBRDF`, which will be used to evaluate the scattering of energy by
@@ -185,7 +185,7 @@ the energy that is emitted from the scene back to the camera's pixel. This
 function invokes another function `Li` to evaluate this energy, but the base
 `Integrator` class provides no implementation.
 
-`NaiveIntegrator` class (N points)
+`NaiveIntegrator` class (25 points)
 ------------
 You will implement the body of the `NaiveIntegrator` class's `Li` function,
 which recursively evaluates the energy emitted from the scene along some ray
@@ -203,7 +203,7 @@ Note that if `Li` is invoked with a depth value of 0 or if the intersection with
 the scene hits an object with no `Material` attached, then `Li` should only
 evaluate and return the light emitted directly from the intersection.
 
-`DiffuseAreaLight` Class (N points)
+`DiffuseAreaLight` Class (10 points)
 -----------
 You will find this class under `scene/lights/diffusearealight.h`, and it
 represents an area light that emits its energy equally in all directions from
@@ -253,6 +253,7 @@ additional color, as light does in reality. You should produce this render:
 Progressive rendering and render region
 ---------------------------------------
 We also have added functionality to progressively render scenes based on the regions you select. By default, if you hit render, you would see the OpenGL preview change to the render of the scene.
+
 ![](./RenderRegion4.png)
 
 The preview scene will show up if you move your camera and then set it to render.
@@ -273,6 +274,30 @@ code to more easily debug your program using breakpoints. First, you will have
 to disable multithreaded rendering of your scene by commenting out a `#define`
 in `MyGL::RenderScene`, and if you wish to debug specific pixels you will have
 to uncomment some example code in `MyGL::RenderScene` and `Integrator::Render`.
+
+Extra credit (30 points maximum)
+-----------
+In addition to the features listed below, you may choose to implement __any
+feature you can think of__ as extra credit, provided you propose the idea to the
+course staff through Piazza first.
+
+#### Oren-Nayar BRDF (5 points)
+Implement a class `OrenNayarBRDF` which inherits from the `BxDF` class and
+implements Oren-Nayar diffuse reflection as described in the textbook. You will
+also have to add code to `MatteMaterial::ProduceBSDF` so that it adds this
+`BxDF` to the `BSDF` it generates when the material's `sigma` term is greater
+than zero. To test your implementation, modify the code in
+`Scene::CreateTestScene` so that the `sigma` value of at least one of the
+`MatteMaterial`s is nonzero. You will just need to implement this BRDF's `f`
+function, since its `Sample_f` and `Pdf` are identical to those of the
+`LambertBRDF` class.
+
+#### Lambertian Transmission BTDF (5 points)
+Implement a class `LambertBTDF` which inherits from the `BxDF` class and
+implements a Lambertian __transmission__ model. This is virtually identical to
+a Lambertian reflection model, but the hemisphere in which rays are sampled is
+on the other side of the surface normal compared to the hemisphere of Lambertian
+reflection.
 
 Submitting your project
 --------------

@@ -183,7 +183,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>R: Move render camera to preview camera</string>
+    <string>G: Move render camera to preview camera</string>
    </property>
    <property name="alignment">
     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>

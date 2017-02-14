@@ -16,7 +16,7 @@
 
 // Global constants. You may not end up using all of these.
 static const float ShadowEpsilon = 0.0001f;
-static const float RayEpsilon = 0.00000001f;
+static const float RayEpsilon = 0.000001f;
 static const float Pi = 3.14159265358979323846;
 static const float TwoPi = 6.28318530717958647692;
 static const float InvPi = 0.31830988618379067154;

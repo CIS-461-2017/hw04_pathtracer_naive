@@ -4,8 +4,7 @@
 
 float Sphere::Area() const
 {
-    //TODO in a later assignment
-    return 0.f;
+    //TODO later
 }
 
 void Sphere::ComputeTBN(const Point3f& P, Normal3f* nor, Vector3f* tan, Vector3f* bit) const
