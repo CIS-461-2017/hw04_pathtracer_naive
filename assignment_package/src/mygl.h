@@ -48,10 +48,6 @@ private:
     IntegratorType integratorType;
 
     QString output_filepath;
-    QOpenGLShaderProgram prog_progressive;
-    bool is_rendering = false;
-    GLuint progressive_position_buffer;
-    QOpenGLTexture* progressive_texture = nullptr;
 
     QTimer render_event_timer;
 
@@ -79,7 +75,15 @@ private:
     bool move_rubberband;
     QPoint rubberband_offset;
     QPoint origin;
-    bool something_rendered;
+    bool progressive_render = true;
+    bool something_rendered = false;
+
+    QOpenGLShaderProgram prog_progressive;
+    int prog_progressive_attribute_position;
+    int prog_progressive_attribute_texcoord;
+    bool is_rendering = false;
+    GLuint progressive_position_buffer;
+    QOpenGLTexture* progressive_texture = nullptr;
 
 protected:
     void keyPressEvent(QKeyEvent *e);
@@ -92,6 +96,8 @@ protected:
 public slots:
     void slot_SetNumSamplesSqrt(int);
     void slot_SetRecursionLimit(int);
+    void slot_SetProgressiveRender(bool);
+
 signals:
     void sig_ResizeToCamera(int,int);
 

@@ -250,6 +250,22 @@ additional color, as light does in reality. You should produce this render:
 
 ![](./intenseTwoLights100CosineNaive.png)
 
+Progressive rendering and render region
+---------------------------------------
+We also have added functionality to progressively render scenes based on the regions you select. By default, if you hit render, you would see the OpenGL preview change to the render of the scene.
+![](./RenderRegion4.png)
+
+The preview scene will show up if you move your camera and then set it to render.
+
+The render region works with the progressive renderer, similar to what exists in Maya.
+![](./RenderRegion1.png)
+
+Click and drag region in the GL preview and hit render.
+
+![](./RenderRegion5.png)
+
+![](./RenderRegion2.png)
+
 Debugging with breakpoints
 ------
 We have set comments in the base code showing where you can _uncomment_ some

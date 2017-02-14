@@ -7,6 +7,7 @@
 #include <scene/materials/mattematerial.h>
 #include <scene/lights/diffusearealight.h>
 
+
 Scene::Scene()
 {}
 
@@ -41,53 +42,53 @@ void Scene::CreateTestScene()
     //Area light
     //Figure in front of light
 
-    Material* matteWhite = new MatteMaterial(Color3f(1,1,1), 0, nullptr, nullptr);
-    Material* matteRed = new MatteMaterial(Color3f(1,0,0), 0, nullptr, nullptr);
-    Material* matteGreen = new MatteMaterial(Color3f(0,1,0), 0, nullptr, nullptr);
+    auto matteWhite = std::make_shared<MatteMaterial>(Color3f(1,1,1), 0, nullptr, nullptr);
+    auto matteRed = std::make_shared<MatteMaterial>(Color3f(1,0,0), 0, nullptr, nullptr);
+    auto matteGreen = std::make_shared<MatteMaterial>(Color3f(0,1,0), 0, nullptr, nullptr);
 
     // Floor, which is a large white plane
-    Shape* floor = new SquarePlane();
+    auto floor = std::make_shared<SquarePlane>();
     floor->transform = Transform(Vector3f(0,0,0), Vector3f(-90,0,0), Vector3f(10,10,1));
-    Primitive* floorPrim = new Primitive(std::shared_ptr<Shape>(floor));
-    floorPrim->material = std::shared_ptr<Material>(matteWhite);
+    auto floorPrim = std::make_shared<Primitive>(floor);
+    floorPrim->material = matteWhite;
     floorPrim->name = QString("Floor");
 
     // Light source, which is a diffuse area light with a large plane as its shape
-    Shape* lightSquare = new SquarePlane();
+    auto lightSquare = std::make_shared<SquarePlane>();
     lightSquare->transform = Transform(Vector3f(0,2.5f,5), Vector3f(0,180,0), Vector3f(8, 5, 1));
-    AreaLight* lightSource = new DiffuseAreaLight(lightSquare->transform, Color3f(1,1,1) * 2.f, std::shared_ptr<Shape>(lightSquare));
-    Primitive* lightPrim = new Primitive(std::shared_ptr<Shape>(lightSquare), nullptr, std::shared_ptr<AreaLight>(lightSource));
+    auto lightSource = std::make_shared<DiffuseAreaLight>(lightSquare->transform, Color3f(1,1,1) * 2.f, lightSquare);
+    auto lightPrim = std::make_shared<Primitive>(lightSquare, nullptr, lightSource);
     lightPrim->name = QString("Light Source");
 
     // Light source 2, which is a diffuse area light with a large plane as its shape
-    Shape* lightSquare2 = new SquarePlane();
+    auto lightSquare2 = std::make_shared<SquarePlane>();
     lightSquare2->transform = Transform(Vector3f(5,2.5f,0), Vector3f(0,90,0), Vector3f(8, 5, 1));
-    AreaLight* lightSource2 = new DiffuseAreaLight(lightSquare2->transform, Color3f(0.9,1,0.7) * 2.f, std::shared_ptr<Shape>(lightSquare2), true);
-    Primitive* lightPrim2 = new Primitive(std::shared_ptr<Shape>(lightSquare2), nullptr, std::shared_ptr<AreaLight>(lightSource2));
+    auto lightSource2 = std::make_shared<DiffuseAreaLight>(lightSquare2->transform, Color3f(0.9,1,0.7) * 2.f, lightSquare2, true);
+    auto lightPrim2 = std::make_shared<Primitive>(lightSquare2, nullptr, lightSource2);
 
     // Shadow casting shape, which is a red sphere
-    Shape* sphere = new Sphere();
+    auto sphere = std::make_shared<Sphere>();
     sphere->transform = Transform(Vector3f(0,1,0), Vector3f(0,0,0), Vector3f(1,1,1));
-    Primitive* spherePrim = new Primitive(std::shared_ptr<Shape>(sphere));
-    spherePrim->material = std::shared_ptr<Material>(matteRed);
+    auto spherePrim = std::make_shared<Primitive>(sphere);
+    spherePrim->material = matteRed;
     spherePrim->name = QString("Red Sphere");
 
     // Back wall, which is a green rectangle
-    Shape* greenWall = new SquarePlane();
+    auto greenWall = std::make_shared<SquarePlane>();
     greenWall->transform = Transform(Vector3f(-5,2.5f,0), Vector3f(0,-90,0), Vector3f(10, 5, 1));
-    Primitive* greenWallPrim = new Primitive(std::shared_ptr<Shape>(greenWall));
-    greenWallPrim->material = std::shared_ptr<Material>(matteGreen);
+    auto greenWallPrim = std::make_shared<Primitive>(greenWall);
+    greenWallPrim->material = matteGreen;
     greenWallPrim->name = QString("Wall");
 
 
-    primitives.append(std::shared_ptr<Primitive>(floorPrim));
-    primitives.append(std::shared_ptr<Primitive>(lightPrim));
-    primitives.append(std::shared_ptr<Primitive>(lightPrim2));
-    primitives.append(std::shared_ptr<Primitive>(spherePrim));
-    primitives.append(std::shared_ptr<Primitive>(greenWallPrim));
+    primitives.append(floorPrim);
+    primitives.append(lightPrim);
+    primitives.append(lightPrim2);
+    primitives.append(spherePrim);
+    primitives.append(greenWallPrim);
 
-    lights.append(std::shared_ptr<Light>(lightSource));
-    lights.append(std::shared_ptr<Light>(lightSource2));
+    lights.append(lightSource);
+    lights.append(lightSource2);
 
     for(std::shared_ptr<Primitive> p : primitives)
     {
