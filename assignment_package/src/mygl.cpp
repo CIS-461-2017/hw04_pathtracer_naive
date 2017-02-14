@@ -131,12 +131,6 @@ void MyGL::initializeGL()
     glBufferData(GL_ARRAY_BUFFER, sizeof(screen_quad_pos), screen_quad_pos, GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    // create full screen quad for progressive rendering
-    glGenBuffers(1, &progressive_position_buffer);
-    glBindBuffer(GL_ARRAY_BUFFER, progressive_position_buffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(screen_quad_pos), screen_quad_pos, GL_STATIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
     //Test scene data initialization
     scene.CreateTestScene();
     ResizeToSceneCamera();
