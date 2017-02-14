@@ -263,9 +263,9 @@ The render region works with the progressive renderer, similar to what exists in
 
 Click and drag region in the GL preview and hit render.
 
-![](./RenderRegion5.png)
-
 ![](./RenderRegion2.png)
+
+![](./RenderRegion5.png)
 
 Debugging with breakpoints
 ------
