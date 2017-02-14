@@ -2,8 +2,8 @@
 
 float Disc::Area() const
 {
-    //TODO in a later assignment
-    return 0;
+    //TODO
+    return 0.f;
 }
 
 bool Disc::Intersect(const Ray &ray, Intersection *isect) const

@@ -15,6 +15,10 @@ void MatteMaterial::ProduceBSDF(Intersection *isect) const
     if(this->normalMap)
     {
         bsdf->normal = bsdf->tangentToWorld *  Material::GetImageColor(isect->uv, this->textureMap.get());
+        //Update bsdf's TBN matrices to support the new normal
+        Vector3f tangent, bitangent;
+        CoordinateSystem(bsdf->normal, &tangent, &bitangent);
+        bsdf->UpdateTangentSpaceMatrices(bsdf->normal, tangent, bitangent);
     }
 
     if(sigma == 0.f)

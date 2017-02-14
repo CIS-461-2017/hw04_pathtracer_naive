@@ -3,13 +3,19 @@
 
 BSDF::BSDF(const Intersection& isect, float eta /*= 1*/)
 //TODO: Properly set worldToTangent and tangentToWorld
-    : worldToTangent(/*COMPUTE ME!*/),
-      tangentToWorld(/*COMPUTE ME!*/),
+    : worldToTangent(/*COMPUTE ME*/),
+      tangentToWorld(/*COMPUTE ME*/),
       normal(isect.normalGeometric),
       eta(eta),
       numBxDFs(0),
       bxdfs{nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr}
 {}
+
+
+void BSDF::UpdateTangentSpaceMatrices(const Normal3f& n, const Vector3f& t, const Vector3f b)
+{
+    //TODO: Update worldToTangent and tangentToWorld based on the normal, tangent, and bitangent
+}
 
 
 //
@@ -63,6 +69,5 @@ Color3f BxDF::Sample_f(const Vector3f &wo, Vector3f *wi, const Point2f &xi,
 // The PDF for uniform hemisphere sampling
 float BxDF::Pdf(const Vector3f &wo, const Vector3f &wi) const
 {
-    //TODO
-    return 0.f;
+    return SameHemisphere(wo, wi) ? Inv2Pi : 0;
 }

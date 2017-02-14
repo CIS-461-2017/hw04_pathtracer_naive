@@ -59,6 +59,8 @@ public:
     // Compute the number of BxDFs that match the input flags.
     int BxDFsMatchingFlags(BxDFType flags) const;
 
+    void UpdateTangentSpaceMatrices(const Normal3f& n, const Vector3f& t, const Vector3f b);
+
     glm::mat3 worldToTangent; // Transforms rays from world space into tangent space,
                               // where the surface normal is always treated as (0, 0, 1)
     glm::mat3 tangentToWorld; // Transforms rays from tangent space into world space.
