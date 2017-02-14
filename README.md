@@ -32,7 +32,9 @@ The Light Transport Equation
 along ray &#969;<sub>o</sub>.
 * __&#8747;<sub><sub>S</sub></sub>__ is the integral over the sphere of ray
 directions from which light can reach point _p_. &#969;<sub>o</sub> and
-&#969;<sub>i</sub> are within this domain.
+&#969;<sub>i</sub> are within this domain. In general, we tend to only care
+about one half of this sphere, determining the relevant half based on the
+reflectance or transmittance of the BSDF.
 * __f__ is the Bidirectional Scattering Distribution Function of the material at
 point _p_, which evaluates the proportion of energy received from
 &#969;<sub>i</sub> at point _p_ that is reflected along &#969;<sub>o</sub>.
